@@ -1,4 +1,4 @@
-# DEV-612 (Without Consul)
+## DEV-612 (Without Consul)
 
 This folder contains the **basic setup** of the Task App using Docker Compose.  
 It runs three services: **Frontend (Nginx)**, **Backend (Node.js + Express)**, and **Database (MongoDB)**.
@@ -6,15 +6,7 @@ It runs three services: **Frontend (Nginx)**, **Backend (Node.js + Express)**, a
 ---
 
 
-# DEV-612 (Without Consul)
-
-This folder contains the **basic setup** of the Task App using Docker Compose.  
-It runs three services: **Frontend (Nginx)**, **Backend (Node.js + Express)**, and **Database (MongoDB)**.
-
----
-
-
-## 📂 Project Structure
+### 📂 Project Structure
 
 without-consul/
 ```bash
@@ -31,7 +23,7 @@ without-consul/
 
 ---
 
-## 🛠 Services
+### 🛠 Services
 - **Frontend (Nginx)**  
   Serves the static `index.html` page. The page allows adding and viewing tasks.
 
@@ -43,7 +35,7 @@ without-consul/
 
 ---
 
-## ▶️ Running the App
+### ▶️ Running the App
 1. Navigate into the `without-consul` folder:
    ```bash
    $ cd without-consul
