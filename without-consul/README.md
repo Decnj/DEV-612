@@ -17,6 +17,7 @@ It runs three services: **Frontend (Nginx)**, **Backend (Node.js + Express)**, a
 ## 📂 Project Structure
 
 without-consul/
+```bash
 ├── backend/
 │   ├── Dockerfile
 │   ├── index.js
@@ -26,7 +27,7 @@ without-consul/
 │   ├── index.html
 ├── docker-compose.yml
 └── .gitignore
-
+```
 
 ---
 
