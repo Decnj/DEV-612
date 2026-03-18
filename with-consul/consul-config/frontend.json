@@ -1,0 +1,11 @@
+{
+  "service": {
+    "name": "frontend",
+    "port": 80,
+    "tags": ["nginx"],
+    "check": {
+      "http": "http://frontend:80",
+      "interval": "10s"
+    }
+  }
+}

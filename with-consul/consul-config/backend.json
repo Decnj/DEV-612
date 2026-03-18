@@ -1,0 +1,11 @@
+{
+  "service": {
+    "name": "backend",
+    "port": 3000,
+    "tags": ["nodejs"],
+    "check": {
+      "http": "http://backend:3000/health",
+      "interval": "10s"
+    }
+  }
+}

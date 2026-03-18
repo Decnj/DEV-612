@@ -1,0 +1,12 @@
+{
+  "service": {
+    "name": "mongodb",
+    "port": 27017,
+    "tags": ["database"],
+    "check": {
+      "tcp": "mongodb:27017",
+      "interval": "10s"
+    }
+  }
+}
+
