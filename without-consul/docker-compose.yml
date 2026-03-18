@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: decnj/nginx-task:1.0
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - task-net
+
+  backend:
+    image: decnj/nodejs-task:1.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - task-net
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      task-net:
+        aliases:
+          - mongo 
+
+volumes:
+  mongo_data:
+
+networks:
+  task-net:
+    driver: bridge
+
