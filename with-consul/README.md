@@ -32,25 +32,27 @@ docker-compose up
 
 This will start:
 
-Frontend (Nginx) on port 8080
+- Frontend (Nginx) on port 8080
 
-Backend (Node.js) on port 3000
+- Backend (Node.js) on port 3000
 
-MongoDB on port 27017
+- MongoDB on port 27017
 
-Consul on port 8500 (UI) and 8600/udp (DNS)
+- Consul on port 8500 (UI) and 8600/udp (DNS)
 
+---
 
 🌐 Endpoints
 
-Frontend UI → http://localhost:8080
+- Frontend UI → http://localhost:8080
 
-Backend API → http://localhost:3000/tasks
+- Backend API → http://localhost:3000/tasks
 
-MongoDB → localhost:27017
+- MongoDB → localhost:27017
 
-Consul UI → http://localhost:8500
+- Consul UI → http://localhost:8500
 
+---
 
 🛠 Consul Service Registration
 
@@ -74,7 +76,8 @@ frontend.json
 ```
 
 
-Backend.json
+
+backend.json
 
 ```json
 json
@@ -90,6 +93,7 @@ json
   }
 }
 ```
+
 
 
 mongodb.json
@@ -108,32 +112,35 @@ mongodb.json
 }
 ```
 
+---
+
 ✅ Health Checks
-Frontend → Consul checks http://frontend:80 (returns HTML page).
 
-Backend → Consul checks http://backend:3000/health (returns 200 OK).
+- Frontend → Consul checks http://frontend:80 (returns HTML page).
 
-MongoDB → Consul checks TCP connectivity on mongodb:27017.
+- Backend → Consul checks http://backend:3000/health (returns 200 OK).
 
+- MongoDB → Consul checks TCP connectivity on mongodb:27017.
 
+---
 
 📊 Viewing Services
 
 Open http://localhost:8500 to see:
 
-frontend (healthy)
+- ✔ frontend (healthy)
 
-backend (healthy once /health endpoint is added)
+- ✔ backend (healthy once /health endpoint is added)
 
-mongodb (healthy if TCP connection succeeds)
+- ✔ mongodb (healthy if TCP connection succeeds)
 
-
+---
 
 🔎 Notes
 
-Consul is running in dev mode (agent -dev -client=0.0.0.0).
+* Consul is running in dev mode (agent -dev -client=0.0.0.0).
 
-For production, you’d run Consul in server/agent mode with proper clustering.
+* For production, you’d run Consul in server/agent mode with proper clustering.
 
-Sidecar proxies (Envoy) are not required here — they’re only needed if you want Consul Connect service mesh features.
+* Sidecar proxies (Envoy) are not required here — they’re only needed if you want Consul Connect service mesh features.
 
