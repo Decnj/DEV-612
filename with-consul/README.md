@@ -1,6 +1,6 @@
 ## Task App with Consul
 
-This setup extends the basic Task App stack by adding **Consul** for service discovery and health monitoring.  
+This setup extends the basic Task App stack by adding **Consul Connect** for service discovery and health monitoring.  
 Consul provides a UI to view registered services (`frontend`, `backend`, `mongodb`) and their health status.
 
 ---
@@ -40,6 +40,8 @@ This will start:
 
 - Consul on port 8500 (UI) and 8600/udp (DNS)
 
+- Envoy sidecar proxies attached to each service for Consul Connect (mTLS, routing, observability)
+
 ---
 
 🌐 Endpoints
@@ -66,10 +68,17 @@ frontend.json
   "service": {
     "name": "frontend",
     "port": 80,
-    "tags": ["nginx"],
     "check": {
-      "http": "http://frontend:80",
+      "tcp": "frontend:80",
       "interval": "10s"
+    },
+    "connect": {
+      "sidecar_service": {
+        "check": {
+          "tcp": "frontend:21001",
+          "interval": "10s"
+        }
+      }
     }
   }
 }
@@ -80,15 +89,21 @@ frontend.json
 backend.json
 
 ```json
-json
 {
   "service": {
     "name": "backend",
     "port": 3000,
-    "tags": ["nodejs"],
     "check": {
-      "http": "http://backend:3000/health",
+      "tcp": "backend:3000",
       "interval": "10s"
+    },
+    "connect": {
+      "sidecar_service": {
+        "check": {
+          "tcp": "backend:21000",
+          "interval": "10s"
+        }
+      }
     }
   }
 }
@@ -103,10 +118,17 @@ mongodb.json
   "service": {
     "name": "mongodb",
     "port": 27017,
-    "tags": ["database"],
     "check": {
       "tcp": "mongodb:27017",
       "interval": "10s"
+    },
+    "connect": {
+      "sidecar_service": {
+        "check": {
+          "tcp": "mongodb:21002",
+          "interval": "10s"
+        }
+      }
     }
   }
 }
@@ -142,5 +164,55 @@ Open http://localhost:8500 to see:
 
 * For production, you’d run Consul in server/agent mode with proper clustering.
 
-* Sidecar proxies (Envoy) are not required here — they’re only needed if you want Consul Connect service mesh features.
+* Envoy sidecar proxies are now integrated for Consul Connect service mesh features:
 
+  - Mutual TLS (mTLS) encryption
+
+  - Authentication between services
+
+  - Secure traffic routing and observability
+
+---
+
+📈 Performance Testing (DEV‑614)
+We used Apache JMeter to simulate user traffic and measure resource utilization.
+
+```bash
+# Download and extract JMeter
+wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+tar -xvzf apache-jmeter-5.6.3.tgz
+cd apache-jmeter-5.6.3/bin
+
+# Run JMeter
+./jmeter.sh
+```
+
+Test Plan Setup:
+
+- Thread Group → 50 users, ramp‑up 10s, loop count 100
+
+-HTTP Sampler → requests to frontend and backend endpoints
+
+- Listener → View Results in Table with Summary Report for performance metrics
+
+---
+
+Resource Monitoring:
+
+CPU and memory utilization of app containers and sidecar proxies were monitored using:
+
+```bash
+$ docker stats
+```
+
+---
+
+Observations:
+
+- Sidecar proxies added ~20–30 MiB RAM each and 1–2% CPU.
+
+- Consul agent added ~50–100 MiB RAM with low CPU.
+
+- App containers behaved almost the same, with slight CPU increases due to traffic encryption and routing.
+
+---
