@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     image: decnj/nginx-task:1.0
@@ -9,6 +7,22 @@ services:
       - backend
     networks:
       - task-net
+    environment:
+      # Point frontend to backend via Consul DNS
+      - BACKEND_URL=http://backend.service.consul:3000
+
+  frontend-sidecar:
+    image: decnj/consul-envoy:1.15.1
+    command: connect envoy -sidecar-for frontend
+    network_mode: "service:frontend"
+    depends_on:
+      frontend:
+        condition: service_started
+      consul:
+        condition: service_healthy
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_GRPC_ADDR=consul:8502
 
   backend:
     image: decnj/nodejs-task:2.0
@@ -18,6 +32,22 @@ services:
       - mongodb
     networks:
       - task-net
+    environment:
+      # Point backend to MongoDB via Consul DNS
+      - MONGO_URL=mongodb.service.consul:27017/taskdb
+
+  backend-sidecar:
+    image: decnj/consul-envoy:1.15.1
+    command: connect envoy -sidecar-for backend
+    network_mode: "service:backend"
+    depends_on:
+      backend:
+        condition: service_started
+      consul:
+        condition: service_healthy
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_GRPC_ADDR=consul:8502
 
   mongodb:
     image: mongo:latest
@@ -30,16 +60,36 @@ services:
         aliases:
           - mongo
 
+  mongodb-sidecar:
+    image: decnj/consul-envoy:1.15.1
+    command: connect envoy -sidecar-for mongodb
+    network_mode: "service:mongodb"
+    depends_on:
+      mongodb:
+        condition: service_started
+      consul:
+        condition: service_healthy
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul:8500
+      - CONSUL_GRPC_ADDR=consul:8502
+
   consul:
     image: consul:1.15
     ports:
-      - "8500:8500"   # Consul UI
+      - "8500:8500"   # Consul UI / HTTP API
+      - "8502:8502"   # Consul gRPC API
+      - "8503:8503"   # Consul gRPC-TLS API
       - "8600:8600/udp"
     command: agent -dev -client=0.0.0.0 -config-dir=/consul/config
     volumes:
       - ./consul-config:/consul/config   # mount your service definitions here
     networks:
       - task-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   mongo_data:
